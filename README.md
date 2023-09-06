@@ -20,7 +20,6 @@ A CLI tool to integrate with CodeThreat services for code scanning.
 - [Usage](#usage)
   - [Scan Command](#scan-command)
   - [Configuration](#configuration)
-- [Features](#features)
 
 ## Installation
 
@@ -60,7 +59,6 @@ Fetches a project.
 
 - **projectName**: The name of the project to fetch.
 
-Returns a `Promise` that resolves to the project data.
 
 ---
 
@@ -70,7 +68,6 @@ Creates a new project.
 
 - **projectName**: The name of the new project.
 
-Returns a `Promise` that resolves to the created project data.
 
 ---
 
@@ -81,7 +78,6 @@ Starts a scan for a project.
 - **projectName**: Name of the project to scan.
 - **zipFilePath**: Path to the zipped target directory.
 
-Returns a `Promise` that resolves to the scan status.
 
 ---
 
@@ -91,5 +87,5 @@ Fetches the progress of a scan.
 
 - **scanId**: ID of the scan to fetch progress for.
 
-Returns a `Promise` that resolves to the scan progress data.
+
 ---
