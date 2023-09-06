@@ -1,0 +1,5 @@
+{
+  "baseUrl": "https://test.com",
+  "organizationName": "TestOrg",
+  "ctAccessToken": "testToken"
+}

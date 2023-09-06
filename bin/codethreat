@@ -1,0 +1,147 @@
+#!/usr/bin/env node
+
+const readline = require('readline');
+const { zipDirectory } = require('../src/utils/zip');
+const { displayProjectInfo, displayScanProgress } = require('../src/utils/display');
+const cliProgress = require('cli-progress');
+
+const { getConfig, setConfig } = require('../src/utils/config');
+const { getProject, createProject } = require('../src/api/project');
+const { startScan, getScanProgress } = require('../src/api/scan');
+const { version } = require('../package.json');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+const chalk = require('chalk');
+
+
+const bannerText = `
+${chalk.green.bold('CodeThreat-CLI')} ${chalk.yellow(`v${version}`)}
+${chalk.white('-----------------------------------')}
+${chalk.white('Build. Ship. Secure Code.')}
+${chalk.blue('Maintained by CT-Team')}
+`;
+
+console.log(bannerText);
+
+const [,, command, ...args] = process.argv;
+
+function handleNullOrUndefined(value, defaultValue = "N/A") {
+  if (value === null || value === undefined) {
+    return defaultValue;
+  }
+  return value;
+}
+// Function to display the metrics
+function displayMetrics(progressData) {
+  console.log(chalk.cyan('\n=== Scan Metrics ==='));
+  console.log(chalk.yellow(`Progress: ${handleNullOrUndefined(progressData.progress_data.progress, 0)}%`));
+  console.log(chalk.yellow(`Current Analysis: ${handleNullOrUndefined(progressData.progress_data.current_analysis)}`));
+  console.log(chalk.yellow(`Current Weakness: ${handleNullOrUndefined(progressData.progress_data.current_weakness)}`));
+  console.log(chalk.yellow(`Total Files: ${handleNullOrUndefined(progressData.nfiles, 0)}`));
+  console.log(chalk.yellow(`Severities: High - ${handleNullOrUndefined(progressData.severities.high, 0)}, Medium - ${handleNullOrUndefined(progressData.severities.medium, 0)}, Low - ${handleNullOrUndefined(progressData.severities.low, 0)}`));
+}
+async function handleScanCommand(targetDir, projectName) {
+  try {
+    let project;
+    try {
+      project = await getProject(projectName);
+      displayProjectInfo(project);
+    } catch (error) {
+      console.log('Project not found, creating a new one...');
+
+      try {
+        project = await createProject(projectName);
+      } catch (creationError) {
+        console.error('Failed to create project:', creationError.message);
+        process.exit(1);
+      }
+    }
+
+    // Once the project is ensured, zip the directory
+    const zipPath = await zipDirectory(targetDir);
+
+    let scanResponse;
+    try {
+      scanResponse = await startScan(projectName, zipPath);
+    } catch (error) {
+      console.error(chalk.red('Failed to start the scan:', error.message));
+      process.exit(1);
+    }
+
+    if (scanResponse.error) {
+      console.error(chalk.red('Error starting the scan:', scanResponse.message));
+      process.exit(1);
+    } else {
+      console.log(chalk.green(`Scan started for project: ${projectName}.`));
+      console.log(chalk.blue(scanResponse.message));
+    }
+    // Save the scan ID for later use
+    const scanId = scanResponse.scan_id;
+  
+    // Create a new progress bar instance
+    const progressBar = new cliProgress.SingleBar({
+        format: 'Scan Progress |' + chalk.green('{bar}') + '| {percentage}% || {value}/{total}',
+        barCompleteChar: '\u2588',
+        barIncompleteChar: '\u2591',
+        hideCursor: true
+    });
+    // Initialize the progress bar
+    progressBar.start(100, 0);
+
+// Begin the interval to check scan progress
+const intervalId = setInterval(async () => {
+  const progressData = await getScanProgress(scanResponse.scan_id);
+  const progressValue = progressData.progress_data.progress;
+  progressBar.update(progressValue);  // Update the progress bar
+
+  // Display metrics
+    displayMetrics(progressData)
+
+  // Check if scan is complete
+  if (progressValue === 100 || progressData.state === 'end') {
+    clearInterval(intervalId);
+    progressBar.stop();  // Stop the progress bar
+    console.log(chalk.green('Scan completed!'));
+  }
+}, 30000);  // 30 seconds
+
+  } catch (error) {
+    console.error('An unexpected error occurred:', error.message);
+    process.exit(1);
+  }
+}
+
+function handleConfigCommand() {
+  rl.question('Enter base URL: ', (baseUrl) => {
+    rl.question('Enter organization name: ', (organizationName) => {
+      rl.question('Enter CT access token: ', (ctAccessToken) => {
+        setConfig({ baseUrl, organizationName, ctAccessToken });
+        console.log('Configuration saved successfully.');
+        rl.close();
+      });
+    });
+  });
+}
+
+switch (command) {
+  case 'scan':
+    const [targetDir, projectFlag, projectName] = args;
+    if (projectFlag !== '-p' || !targetDir || !projectName) {
+      console.error('Usage: codethreat scan <target_dir> -p <project_name>');
+      process.exit(1);
+    }
+    handleScanCommand(targetDir, projectName);
+    break;
+
+  case 'config':
+    handleConfigCommand();
+    break;
+
+  default:
+    console.error('Unknown command:', command);
+    console.error('Usage: codethreat <command> [options]');
+    process.exit(1);
+}
