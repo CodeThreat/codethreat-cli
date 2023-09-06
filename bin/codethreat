@@ -34,7 +34,6 @@ function handleNullOrUndefined(value, defaultValue = "N/A") {
   }
   return value;
 }
-// Function to display the metrics
 function displayMetrics(progressData) {
   console.log(chalk.cyan('\n=== Scan Metrics ==='));
   console.log(chalk.yellow(`Progress: ${handleNullOrUndefined(progressData.progress_data.progress, 0)}%`));
@@ -78,33 +77,35 @@ async function handleScanCommand(targetDir, projectName) {
       console.log(chalk.green(`Scan started for project: ${projectName}.`));
       console.log(chalk.blue(scanResponse.message));
     }
-    // Save the scan ID for later use
     const scanId = scanResponse.scan_id;
   
-    // Create a new progress bar instance
     const progressBar = new cliProgress.SingleBar({
         format: 'Scan Progress |' + chalk.green('{bar}') + '| {percentage}% || {value}/{total}',
         barCompleteChar: '\u2588',
         barIncompleteChar: '\u2591',
         hideCursor: true
     });
-    // Initialize the progress bar
+
     progressBar.start(100, 0);
 
-// Begin the interval to check scan progress
 const intervalId = setInterval(async () => {
   const progressData = await getScanProgress(scanResponse.scan_id);
   const progressValue = progressData.progress_data.progress;
+  console.log(chalk.cyan('\n\n Processing the scan...'));
+
   progressBar.update(progressValue);  // Update the progress bar
 
   // Display metrics
     displayMetrics(progressData)
 
-  // Check if scan is complete
   if (progressValue === 100 || progressData.state === 'end') {
     clearInterval(intervalId);
     progressBar.stop();  // Stop the progress bar
-    console.log(chalk.green('Scan completed!'));
+    console.log(chalk.green('\n\n Scan completed!'));
+
+    const config = getConfig();
+    const resultLink = `${config.baseUrl}/issues?scan_id=${scanResponse.scan_id}&projectName=${projectName}`;
+    console.log(chalk.blue(`Check your scan results at: ${resultLink}`));
   }
 }, 30000);  // 30 seconds
 

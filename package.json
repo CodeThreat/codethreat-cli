@@ -1,6 +1,6 @@
 {
   "name": "codethreat-cli",
-  "version": "1.0.0",
+  "version": "0.61.0",
   "description": "A CLI tool to integrate with CodeThreat services for code scanning and threat detection.",
   "main": "\u001b[Dsrc/index.js",
   "scripts": {
