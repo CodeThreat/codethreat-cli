@@ -55,7 +55,6 @@ async function getScanProgress(scanId) {
         return response.data;
     } catch (error) {
         throw new Error(`Failed to fetch the scan progress: ${error.message}`);
-
     }
  
 }
