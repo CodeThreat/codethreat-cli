@@ -30,7 +30,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           changelog_increment_filename: body.md
 
-      - name: Store version in env variable
+      - name: Output version for later steps
         run: echo "VERSION=${{ steps.bump_version.outputs.version }}" >> $GITHUB_ENV
 
   build:
@@ -63,7 +63,7 @@ jobs:
       - name: Archive the build output for Windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          Compress-Archive -Path dist\*.exe -DestinationPath dist\codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
+          Compress-Archive -Path dist\*.exe -DestinationPath dist/codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
         shell: pwsh
 
       - name: Archive the build output for Linux and macOS
