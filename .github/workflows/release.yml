@@ -12,7 +12,6 @@ jobs:
     name: "Bump version and create changelog with commitizen"
     outputs:
       revision: ${{ steps.cz.outputs.version }}
-      changelog: ${{ steps.cz.outputs.changelog }}
     steps:
       - name: Check out
         uses: actions/checkout@v3
@@ -25,11 +24,12 @@ jobs:
         uses: commitizen-tools/commitizen-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          changelog_increment_filename: body.md
 
       - name: Set version and changelog
         run: |
           echo "REVISION=${{ steps.cz.outputs.version }}" >> $GITHUB_ENV
-          echo "CHANGELOG=${{ steps.cz.outputs.changelog }}" >> $GITHUB_ENV
+          echo "CHANGELOG_PATH=body.md" >> $GITHUB_ENV
 
   build:
     needs: bump_version
@@ -90,8 +90,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.bump_version.outputs.revision }}
-          release_name: ${{ needs.bump_version.outputs.revision }}
-          body_path: "body.md"
+          name: ${{ needs.bump_version.outputs.revision }}
+          body_path: ${{ env.CHANGELOG_PATH }}
           draft: false
           prerelease: false
         env:
