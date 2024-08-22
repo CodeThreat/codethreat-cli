@@ -2,8 +2,15 @@ import tempfile
 import unittest
 from unittest.mock import patch, MagicMock
 import os
+import random
+import string
 from click.testing import CliRunner
 from cli.scan import scan, FAILURE_EXIT_CODE, SUCCESS_EXIT_CODE
+
+
+def generate_random_project_name(prefix="test_project_", length=6):
+    """Generates a random project name."""
+    return prefix + ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
 
 class TestScanCommand(unittest.TestCase):
@@ -29,8 +36,8 @@ class TestScanCommand(unittest.TestCase):
         source_code_path = os.path.abspath(os.path.dirname(__file__))
 
         runner = CliRunner()
-        result = runner.invoke(scan, ['--target', source_code_path, '--project', 'new_project', '--url', url, '--token',
-                                      token, '--org', org])
+        result = runner.invoke(scan, ['--target', source_code_path, '--project', generate_random_project_name(),
+                                      '--url', url, '--token', token, '--org', org])
 
         print(result.output)  # For debugging purposes
         print(mock_post.return_value.json.return_value)  # For debugging the mock's json response
@@ -59,8 +66,8 @@ class TestScanCommand(unittest.TestCase):
         source_code_path = os.path.abspath(os.path.dirname(__file__))
 
         runner = CliRunner()
-        result = runner.invoke(scan, ['--target', source_code_path, '--project', 'new_project', '--url', url, '--token',
-                                      token, '--org', org])
+        result = runner.invoke(scan, ['--target', source_code_path, '--project', generate_random_project_name(),
+                                      '--url', url, '--token', token, '--org', org])
 
         print(result.output)  # For debugging purposes
         print(mock_post.return_value.json.return_value)  # For debugging the mock's json response
@@ -86,8 +93,8 @@ class TestScanCommand(unittest.TestCase):
 
         runner = CliRunner()
         result = runner.invoke(scan,
-                               ['--target', source_code_path, '--project', 'test_project_123', '--url', url, '--token',
-                                token, '--org', org])
+                               ['--target', source_code_path, '--project', generate_random_project_name(),
+                                '--url', url, '--token', token, '--org', org])
 
         print(result.output)  # For debugging purposes
         self.assertEqual(result.exit_code, FAILURE_EXIT_CODE)
