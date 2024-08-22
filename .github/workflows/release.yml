@@ -79,13 +79,13 @@ jobs:
           path: dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
 
   release-artifacts:
-    needs: [ bump_version, build ]
+    needs: [bump_version, build]
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          path: ./dist
+          path: dist
 
       - name: Create GitHub release
         id: create_release
@@ -94,23 +94,14 @@ jobs:
           tag_name: ${{ needs.bump_version.outputs.revision }}
           name: "Release ${{ needs.bump_version.outputs.revision }}"
           body_path: body.md
-          body: body.md
           draft: false
           prerelease: false
           files: |
-            ./dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-macos-latest
-            ./dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-ubuntu-latest
-            ./dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-windows-latest.zip
-            ./dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest
-            ./dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest
-            ./dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-macos-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-ubuntu-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-windows-latest.zip
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-*
-          asset_name: codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
-          asset_content_type: application/zip
