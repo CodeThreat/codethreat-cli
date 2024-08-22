@@ -2,14 +2,14 @@ import unittest
 from unittest.mock import patch, mock_open
 import os
 from click.testing import CliRunner
-import auth
+from cli import auth
 
 
 class TestAuthCommands(unittest.TestCase):
 
     @patch('auth.requests.get')
     @patch('builtins.open', new_callable=mock_open)
-    def test_login_with_github_secrets(self, mock_open_file, mock_requests_get):
+    def test_login(self, mock_open_file, mock_requests_get):
         # Mocking the requests
         mock_requests_get.return_value.status_code = 200
 

@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import os
 from click.testing import CliRunner
-import scan
+from cli import scan
 
 class TestScanCommand(unittest.TestCase):
 
