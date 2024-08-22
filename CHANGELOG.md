@@ -1,3 +1,9 @@
+## 0.1.10 (2024-08-22)
+
+### Fix
+
+- double quote on release yml
+
 ## 0.1.9 (2024-08-22)
 
 ### Fix
