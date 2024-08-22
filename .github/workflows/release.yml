@@ -26,10 +26,11 @@ jobs:
 
       - name: Bump version and generate changelog
         id: bump_version
-        run: |
-          cz bump --changelog
-          NEW_VERSION=$(cz bump --dry-run --files-only | grep -oP '([0-9]+\.[0-9]+\.[0-9]+)')
-          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        uses: commitizen-tools/commitizen-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub release
         run: |
@@ -94,8 +95,8 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ steps.bump_version.outputs.VERSION }}
-          release_name: ${{ steps.bump_version.outputs.VERSION }}
+          tag_name: ${{ steps.bump_version.outputs.version }}
+          release_name: ${{ steps.bump_version.outputs.version }}
           draft: false
           prerelease: false
         env:
