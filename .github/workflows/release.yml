@@ -25,11 +25,86 @@ jobs:
           pip install semantic-release
 
       - name: Bump version and generate changelog
+        id: bump_version
         run: |
           cz bump --changelog
+          NEW_VERSION=$(cz bump --dry-run --files-only | grep -oP '([0-9]+\.[0-9]+\.[0-9]+)')
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Create GitHub release
         run: |
           npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        architecture: [x86_64, arm64]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Build executables
+        run: |
+          pyinstaller --onefile cli/main.py --name "codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}"
+        shell: bash
+
+      - name: Archive the build output for Windows
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          Compress-Archive -Path dist\*.exe -DestinationPath dist\codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
+        shell: pwsh
+
+      - name: Archive the build output for Linux and macOS
+        if: matrix.os != 'windows-latest'
+        run: |
+          tar -czvf dist/codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}
+          path: dist/codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.*
+
+  release-artifacts:
+    needs: [release, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: dist
+
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.bump_version.outputs.VERSION }}
+          release_name: ${{ steps.bump_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/*
+          asset_name: codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.*
+          asset_content_type: application/zip
