@@ -1,3 +1,9 @@
+## 0.1.8 (2024-08-22)
+
+### Fix
+
+- add changelog increment filename
+
 ## 0.1.7 (2024-08-22)
 
 ### Fix
