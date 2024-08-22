@@ -25,7 +25,6 @@ class TestScanCommand(unittest.TestCase):
         mock_make_archive.return_value = os.path.join(tempfile.gettempdir(), 'test.zip')
         mock_get.return_value.status_code = 200
         mock_post.return_value.status_code = 200
-        mock_post.return_value.json.return_value = {"scan_id": "fake_scan_id"}
 
         # Retrieve secrets from environment variables
         org = os.environ.get('CODETHREAT_ORG')
@@ -40,7 +39,6 @@ class TestScanCommand(unittest.TestCase):
                                       '--url', url, '--token', token, '--org', org])
 
         print(result.output)  # For debugging purposes
-        print(mock_post.return_value.json.return_value)  # For debugging the mock's json response
         self.assertEqual(result.exit_code, SUCCESS_EXIT_CODE)
         self.assertIn("[CT*] Scan started successfully", result.output)
         mock_make_archive.assert_called_once()
@@ -54,7 +52,7 @@ class TestScanCommand(unittest.TestCase):
         mock_post.side_effect = [
             MagicMock(status_code=200,
                       json=MagicMock(return_value={"result": {"message": "successfull"}, "error": False})),
-            MagicMock(status_code=200, json=MagicMock(return_value={"scan_id": "fake_scan_id"}))
+            MagicMock(status_code=200)
         ]
 
         # Retrieve secrets from environment variables
@@ -70,7 +68,6 @@ class TestScanCommand(unittest.TestCase):
                                       '--url', url, '--token', token, '--org', org])
 
         print(result.output)  # For debugging purposes
-        print(mock_post.return_value.json.return_value)  # For debugging the mock's json response
         self.assertEqual(result.exit_code, SUCCESS_EXIT_CODE)
         self.assertIn("[CT*] Project 'new_project' created successfully.", result.output)
         self.assertIn("[CT*] Scan started successfully", result.output)
