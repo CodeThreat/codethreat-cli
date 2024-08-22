@@ -55,26 +55,26 @@ jobs:
 
       - name: Build executables
         run: |
-          pyinstaller --onefile cli/main.py --name "codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}"
+          pyinstaller --onefile cli/main.py --name "codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}"
         shell: bash
 
       - name: Archive the build output for Windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          Compress-Archive -Path dist\*.exe -DestinationPath dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
+          Compress-Archive -Path dist\*.exe -DestinationPath dist/codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
         shell: pwsh
 
       - name: Archive the build output for Linux and macOS
         if: matrix.os != 'windows-latest'
         run: |
-          tar -czvf dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}
+          tar -czvf dist/codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}
         shell: bash
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}
-          path: dist/*
+          name: codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}"
+          path: dist/codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}.*
 
   release-artifacts:
     needs: [bump_version, build]
@@ -89,8 +89,8 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.bump_version.outputs.revision }}
-          name: ${{ needs.bump_version.outputs.revision }}
+          tag_name: ${{ env.REVISION }}
+          name: "Release ${{ env.REVISION }}"
           body_path: ${{ env.CHANGELOG_PATH }}
           draft: false
           prerelease: false
@@ -101,6 +101,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/*
-          asset_name: codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
+          asset_path: dist/codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}.*
+          asset_name: codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}.{{ github.event.release.uploaded_artifact.extension }}
           asset_content_type: application/zip
