@@ -86,6 +86,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: dist
+      - name: List files in dist directory
+        run: ls -l dist
 
       - name: Create GitHub release
         id: create_release
@@ -93,7 +95,7 @@ jobs:
         with:
           tag_name: ${{ needs.bump_version.outputs.revision }}
           name: "Release ${{ needs.bump_version.outputs.revision }}"
-          body_path: body.md
+          body_path: ${{ needs.bump_version.outputs.changelog }}
           draft: false
           prerelease: false
           files: |
@@ -103,5 +105,6 @@ jobs:
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
+
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
