@@ -92,7 +92,7 @@ jobs:
           path: dist
 
       - name: List files in dist directory
-        run: ls -l dist
+        run: ls -lR dist
 
       - name: Create GitHub release
         id: create_release
