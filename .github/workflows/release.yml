@@ -94,8 +94,16 @@ jobs:
           tag_name: ${{ needs.bump_version.outputs.revision }}
           name: "Release ${{ needs.bump_version.outputs.revision }}"
           body_path: ${{ needs.bump_version.outputs.changelog }}
+          body: ${{ needs.bump_version.outputs.changelog }}
           draft: false
           prerelease: false
+          files: |
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-macos-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-ubuntu-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-windows-latest.zip
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
