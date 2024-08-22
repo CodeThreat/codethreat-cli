@@ -57,19 +57,23 @@ jobs:
 
       - name: Build executables
         run: |
-          pyinstaller --onefile cli/main.py --name "codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}"
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            pyinstaller --onefile cli/main.py --name "codethreat-cli.exe"
+          else
+            pyinstaller --onefile cli/main.py --name "codethreat-cli"
+          fi
         shell: bash
 
       - name: Archive the build output for Windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          Compress-Archive -Path dist\*.exe -DestinationPath dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
+          Compress-Archive -Path dist\codethreat-cli.exe -DestinationPath dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
         shell: pwsh
 
       - name: Archive the build output for Linux and macOS
         if: matrix.os != 'windows-latest'
         run: |
-          tar -czvf dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}
+          tar -czvf dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli
         shell: bash
 
       - name: Upload artifacts
@@ -86,6 +90,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: dist
+
       - name: List files in dist directory
         run: ls -l dist
 
@@ -96,14 +101,15 @@ jobs:
           tag_name: ${{ needs.bump_version.outputs.revision }}
           name: "Release ${{ needs.bump_version.outputs.revision }}"
           body_path: ${{ needs.bump_version.outputs.changelog }}
+          body: ${{ needs.bump_version.outputs.changelog }}
           draft: false
           prerelease: false
           files: |
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-macos-latest
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-ubuntu-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-macos-latest.tar.gz
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-ubuntu-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-windows-latest.zip
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest.tar.gz
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
 
         env:
