@@ -79,7 +79,7 @@ jobs:
           path: dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
 
   release-artifacts:
-    needs: [bump_version, build]
+    needs: [ bump_version, build ]
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
@@ -103,6 +103,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
-          asset_name: codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}
+          asset_path: dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-*
+          asset_name: codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
           asset_content_type: application/zip
