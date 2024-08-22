@@ -26,8 +26,12 @@ jobs:
       - name: Set version
         run: echo "REVISION=${{ steps.cz.outputs.version }}" >> $GITHUB_ENV
 
-      - name: Print Version
-        run: echo "Bumped to version ${{ env.REVISION }}"
+      - name: Push the new tag
+        run: |
+          git tag ${{ steps.cz.outputs.version }}
+          git push origin ${{ steps.cz.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     needs: bump_version
@@ -59,7 +63,7 @@ jobs:
       - name: Archive the build output for Windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          Compress-Archive -Path dist\*.exe -DestinationPath dist\codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
+          Compress-Archive -Path dist\*.exe -DestinationPath dist/codethreat-cli-${{ env.REVISION }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
         shell: pwsh
 
       - name: Archive the build output for Linux and macOS
@@ -84,10 +88,13 @@ jobs:
           path: dist
 
       - name: Create GitHub release
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          body_path: "body.md"
           tag_name: "${{ env.REVISION }}"
+          release_name: "${{ env.REVISION }}"
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
