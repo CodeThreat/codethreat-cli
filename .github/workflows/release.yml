@@ -26,13 +26,6 @@ jobs:
       - name: Set version
         run: echo "REVISION=${{ steps.cz.outputs.version }}" >> $GITHUB_ENV
 
-      - name: Push the new tag
-        run: |
-          git tag ${{ steps.cz.outputs.version }}
-          git push origin ${{ steps.cz.outputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   build:
     needs: bump_version
     runs-on: ${{ matrix.os }}
