@@ -12,6 +12,7 @@ jobs:
     name: "Bump version and create changelog with commitizen"
     outputs:
       revision: ${{ steps.cz.outputs.version }}
+      changelog: ${{ steps.cz.outputs.changelog }}
     steps:
       - name: Check out
         uses: actions/checkout@v3
@@ -25,8 +26,10 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set version
-        run: echo "REVISION=${{ steps.cz.outputs.version }}" >> $GITHUB_ENV
+      - name: Set version and changelog
+        run: |
+          echo "REVISION=${{ steps.cz.outputs.version }}" >> $GITHUB_ENV
+          echo "CHANGELOG=${{ steps.cz.outputs.changelog }}" >> $GITHUB_ENV
 
   build:
     needs: bump_version
@@ -71,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}
-          path: dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
+          path: dist/*
 
   release-artifacts:
     needs: [bump_version, build]
@@ -88,6 +91,7 @@ jobs:
         with:
           tag_name: ${{ needs.bump_version.outputs.revision }}
           release_name: ${{ needs.bump_version.outputs.revision }}
+          body_path: "body.md"
           draft: false
           prerelease: false
         env:
