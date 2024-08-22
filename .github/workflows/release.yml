@@ -105,12 +105,12 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-macos-latest.tar.gz
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-ubuntu-latest.tar.gz
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-windows-latest.zip
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest.tar.gz
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest.tar.gz
-            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-macos-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-macos-latest.tar.gz
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-ubuntu-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-ubuntu-latest.tar.gz
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-windows-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-arm64-windows-latest.zip
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest.tar.gz
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest.tar.gz
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
 
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
