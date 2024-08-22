@@ -1,3 +1,11 @@
+## 0.1.13 (2024-08-22)
+
+### Fix
+
+- release artifacts step
+- versioning
+- release upload action
+
 ## 0.1.12 (2024-08-22)
 
 ### Fix
