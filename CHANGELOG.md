@@ -1,3 +1,9 @@
+## 0.1.9 (2024-08-22)
+
+### Fix
+
+- change path and extension
+
 ## 0.1.8 (2024-08-22)
 
 ### Fix
