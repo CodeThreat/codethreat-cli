@@ -5,12 +5,18 @@ import os
 import random
 import string
 from click.testing import CliRunner
-from cli.scan import scan
+from cli.scan import scan, FAILURE_EXIT_CODE, SUCCESS_EXIT_CODE
+import re
 
 
 def generate_random_project_name(prefix="test_project_", length=6):
     """Generates a random project name."""
     return prefix + ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+
+
+def strip_ansi_codes(text):
+    """Remove ANSI color codes from a string."""
+    return re.sub(r'\x1b\[[0-9;]*m', '', text)
 
 
 class TestScanCommand(unittest.TestCase):
@@ -38,9 +44,10 @@ class TestScanCommand(unittest.TestCase):
         result = runner.invoke(scan, ['--target', source_code_path, '--project', generate_random_project_name(),
                                       '--url', url, '--token', token, '--org', org])
 
-        print(result.output)  # For debugging purposes
-        # Remove the exit code assertion for now to see the actual output
-        self.assertIn("[CT*] Scan started successfully", result.output)
+        output = strip_ansi_codes(result.output)  # Strip ANSI codes for comparison
+        print(output)  # For debugging purposes
+        self.assertEqual(result.exit_code, SUCCESS_EXIT_CODE)
+        self.assertIn("Scan started successfully", output)
         mock_make_archive.assert_called_once()
         mock_post.assert_called()
 
@@ -67,10 +74,12 @@ class TestScanCommand(unittest.TestCase):
         result = runner.invoke(scan, ['--target', source_code_path, '--project', generate_random_project_name(),
                                       '--url', url, '--token', token, '--org', org])
 
-        print(result.output)  # For debugging purposes
-        # Remove the exit code assertion for now to see the actual output
-        self.assertIn("[CT*] Project 'new_project' created successfully.", result.output)
-        self.assertIn("[CT*] Scan started successfully", result.output)
+        output = strip_ansi_codes(result.output)  # Strip ANSI codes for comparison
+        print(output)  # For debugging purposes
+        self.assertEqual(result.exit_code, SUCCESS_EXIT_CODE)
+        self.assertIn("Project '", output)
+        self.assertIn("created successfully.", output)
+        self.assertIn("Scan started successfully", output)
         mock_post.assert_called()
 
     @patch('cli.scan.requests.get')
@@ -93,9 +102,10 @@ class TestScanCommand(unittest.TestCase):
                                ['--target', source_code_path, '--project', generate_random_project_name(),
                                 '--url', url, '--token', token, '--org', org])
 
-        print(result.output)  # For debugging purposes
-        # Remove the exit code assertion for now to see the actual output
-        self.assertIn("[CT*] Scan initiation failed", result.output)
+        output = strip_ansi_codes(result.output)  # Strip ANSI codes for comparison
+        print(output)  # For debugging purposes
+        self.assertEqual(result.exit_code, FAILURE_EXIT_CODE)
+        self.assertIn("Scan initiation failed", output)
 
 
 if __name__ == '__main__':
