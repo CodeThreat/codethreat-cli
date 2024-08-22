@@ -5,7 +5,10 @@ on: [ push, pull_request ]
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    env:
+      CODETHREAT_ORG: ${{ secrets.CODETHREAT_ORG }}
+      CODETHREAT_TOKEN: ${{ secrets.CODETHREAT_TOKEN }}
+      CODETHREAT_URL: ${{ secrets.CODETHREAT_URL }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
