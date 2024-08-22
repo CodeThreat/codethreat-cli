@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, mock_open
 import os
 from click.testing import CliRunner
-from cli import auth
+from cli.auth import auth
 
 
 class TestAuthCommands(unittest.TestCase):
