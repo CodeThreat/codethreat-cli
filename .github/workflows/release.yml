@@ -25,12 +25,12 @@ jobs:
         uses: commitizen-tools/commitizen-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          changelog_increment_filename: body.md
+          changelog_increment_filename: changelog-${{ steps.cz.outputs.version }}.md
 
       - name: Set Outputs
         run: |
           echo "REVISION=${{ steps.cz.outputs.version }}" >> $GITHUB_ENV
-          echo "CHANGELOG_PATH=body.md" >> $GITHUB_ENV
+          echo "CHANGELOG_PATH=changelog-${{ steps.cz.outputs.version }}.md" >> $GITHUB_ENV
         id: set_output
 
   build:
@@ -58,9 +58,9 @@ jobs:
       - name: Build executables
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            pyinstaller --onefile cli/main.py --name "codethreat-cli.exe"
+            pyinstaller --onefile cli/main.py --name "codethreat-cli.exe" --icon=ct.ico
           else
-            pyinstaller --onefile cli/main.py --name "codethreat-cli"
+            pyinstaller --onefile cli/main.py --name "codethreat-cli" --icon=ct.ico
           fi
         shell: bash
 
@@ -76,11 +76,17 @@ jobs:
           tar -czvf dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli
         shell: bash
 
+      - name: Add changelog to artifacts
+        run: |
+          cp ${{ needs.bump_version.outputs.changelog }} dist/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}
-          path: dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
+          path: |
+            dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
+            dist/${{ needs.bump_version.outputs.changelog }}
 
   release-artifacts:
     needs: [bump_version, build]
@@ -100,8 +106,7 @@ jobs:
         with:
           tag_name: ${{ needs.bump_version.outputs.revision }}
           name: "Release ${{ needs.bump_version.outputs.revision }}"
-          body_path: ${{ needs.bump_version.outputs.changelog }}
-          body: ${{ needs.bump_version.outputs.changelog }}
+          body_path: dist/${{ needs.bump_version.outputs.changelog }}
           draft: false
           prerelease: false
           files: |
@@ -111,6 +116,7 @@ jobs:
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
+            dist/${{ needs.bump_version.outputs.changelog }}
 
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

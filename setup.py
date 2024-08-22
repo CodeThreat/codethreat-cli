@@ -9,8 +9,10 @@ setup(
     packages=find_packages(include=['cli', 'cli.*']),
     include_package_data=True,
     install_requires=[
-        # Add any dependencies here, for example:
-        # "requests",
+        'setuptools~=73.0.1',
+        'click~=8.1.7',
+        'requests~=2.32.3',
+        'colorama~=0.4.6',
     ],
     entry_points={
         "console_scripts": [
