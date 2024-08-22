@@ -54,26 +54,26 @@ jobs:
 
       - name: Build executables
         run: |
-          pyinstaller --onefile cli/main.py --name "codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}"
+          pyinstaller --onefile cli/main.py --name "codethreat-cli-${{ steps.bump_version.outputs.version }}-${{ matrix.architecture }}-${{ matrix.os }}"
         shell: bash
 
       - name: Archive the build output for Windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          Compress-Archive -Path dist\*.exe -DestinationPath dist\codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
+          Compress-Archive -Path dist\*.exe -DestinationPath dist\codethreat-cli-${{ steps.bump_version.outputs.version }}-${{ matrix.architecture }}-${{ matrix.os }}.zip
         shell: pwsh
 
       - name: Archive the build output for Linux and macOS
         if: matrix.os != 'windows-latest'
         run: |
-          tar -czvf dist/codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}
+          tar -czvf dist/codethreat-cli-${{ steps.bump_version.outputs.version }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli-${{ steps.bump_version.outputs.version }}-${{ matrix.architecture }}-${{ matrix.os }}
         shell: bash
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}
-          path: dist/codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.*
+          name: codethreat-cli-${{ steps.bump_version.outputs.version }}-${{ matrix.architecture }}-${{ matrix.os }}
+          path: dist/codethreat-cli-${{ steps.bump_version.outputs.version }}-${{ matrix.architecture }}-${{ matrix.os }}.*
 
   release-artifacts:
     needs: [release, build]
@@ -100,5 +100,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: dist/*
-          asset_name: codethreat-cli-${{ env.VERSION }}-${{ matrix.architecture }}-${{ matrix.os }}.*
+          asset_name: codethreat-cli-${{ steps.bump_version.outputs.version }}-${{ matrix.architecture }}-${{ matrix.os }}.*
           asset_content_type: application/zip
