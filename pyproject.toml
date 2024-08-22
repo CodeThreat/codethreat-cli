@@ -1,0 +1,24 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "semver2"
+version_provider = "pep621"
+update_changelog_on_bump = true
+
+[project]
+name = "codethreat-cli"
+version = "0.1.0"
+description = "CLI toolset for CodeThreat SAST"
+authors = ["Your Name <your.email@example.com>"]
+dependencies = [
+    # Your project dependencies
+]
+
+[project.urls]
+homepage = "https://cloud.codethreat.com"
+repository = "https://github.com/codethreat/codethreat-cli"
+
+# Optional: For more modern Python packaging configuration
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
