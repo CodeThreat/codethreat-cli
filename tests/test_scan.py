@@ -3,7 +3,8 @@ import unittest
 from unittest.mock import patch, MagicMock
 import os
 from click.testing import CliRunner
-from cli.scan import scan
+from cli.scan import scan, FAILURE_EXIT_CODE, ERROR_EXIT_CODE, SUCCESS_EXIT_CODE
+
 
 class TestScanCommand(unittest.TestCase):
 
@@ -28,9 +29,11 @@ class TestScanCommand(unittest.TestCase):
         source_code_path = os.path.abspath(os.path.dirname(__file__))
 
         runner = CliRunner()
-        result = runner.invoke(scan, ['--target', source_code_path, '--project', 'new_project', '--url', url, '--token', token, '--org', org])
+        result = runner.invoke(scan, ['--target', source_code_path, '--project', 'new_project', '--url', url, '--token',
+                                      token, '--org', org])
 
-        self.assertEqual(result.exit_code, 0)
+        print(result.output)  # Add this line for debugging
+        self.assertEqual(result.exit_code, SUCCESS_EXIT_CODE)
         self.assertIn("[CT*] Scan started successfully", result.output)
         mock_make_archive.assert_called_once()
         mock_post.assert_called()
@@ -41,7 +44,8 @@ class TestScanCommand(unittest.TestCase):
         # Mocking project creation and scan initiation
         mock_get.return_value.status_code = 404
         mock_post.side_effect = [
-            MagicMock(status_code=200, json=MagicMock(return_value={"result": {"message": "successfull"}, "error": False})),
+            MagicMock(status_code=200,
+                      json=MagicMock(return_value={"result": {"message": "successfull"}, "error": False})),
             MagicMock(status_code=200, json=MagicMock(return_value={"scan_id": "fake_scan_id"}))
         ]
 
@@ -54,9 +58,11 @@ class TestScanCommand(unittest.TestCase):
         source_code_path = os.path.abspath(os.path.dirname(__file__))
 
         runner = CliRunner()
-        result = runner.invoke(scan, ['--target', source_code_path, '--project', 'new_project', '--url', url, '--token', token, '--org', org])
+        result = runner.invoke(scan, ['--target', source_code_path, '--project', 'new_project', '--url', url, '--token',
+                                      token, '--org', org])
 
-        self.assertEqual(result.exit_code, 0)
+        print(result.output)  # Add this line for debugging
+        self.assertEqual(result.exit_code, SUCCESS_EXIT_CODE)
         self.assertIn("[CT*] Project 'new_project' created successfully.", result.output)
         self.assertIn("[CT*] Scan started successfully", result.output)
         mock_post.assert_called()
@@ -77,10 +83,14 @@ class TestScanCommand(unittest.TestCase):
         source_code_path = os.path.abspath(os.path.dirname(__file__))
 
         runner = CliRunner()
-        result = runner.invoke(scan, ['--target', source_code_path, '--project', 'test_project_123', '--url', url, '--token', token, '--org', org])
+        result = runner.invoke(scan,
+                               ['--target', source_code_path, '--project', 'test_project_123', '--url', url, '--token',
+                                token, '--org', org])
 
-        self.assertEqual(result.exit_code, scan.FAILURE_EXIT_CODE)
+        print(result.output)  # Add this line for debugging
+        self.assertEqual(result.exit_code, FAILURE_EXIT_CODE)
         self.assertIn("[CT*] Scan initiation failed", result.output)
+
 
 if __name__ == '__main__':
     unittest.main()
