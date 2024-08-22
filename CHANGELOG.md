@@ -1,3 +1,9 @@
+## 0.1.16 (2024-08-22)
+
+### Fix
+
+- remove upload release assets action
+
 ## 0.1.15 (2024-08-22)
 
 ### Fix
