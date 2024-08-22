@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import os
 from click.testing import CliRunner
-from cli.scan import scan, FAILURE_EXIT_CODE, ERROR_EXIT_CODE, SUCCESS_EXIT_CODE
+from cli.scan import scan, FAILURE_EXIT_CODE, SUCCESS_EXIT_CODE
 
 
 class TestScanCommand(unittest.TestCase):
@@ -32,7 +32,8 @@ class TestScanCommand(unittest.TestCase):
         result = runner.invoke(scan, ['--target', source_code_path, '--project', 'new_project', '--url', url, '--token',
                                       token, '--org', org])
 
-        print(result.output)  # Add this line for debugging
+        print(result.output)  # For debugging purposes
+        print(mock_post.return_value.json.return_value)  # For debugging the mock's json response
         self.assertEqual(result.exit_code, SUCCESS_EXIT_CODE)
         self.assertIn("[CT*] Scan started successfully", result.output)
         mock_make_archive.assert_called_once()
@@ -61,7 +62,8 @@ class TestScanCommand(unittest.TestCase):
         result = runner.invoke(scan, ['--target', source_code_path, '--project', 'new_project', '--url', url, '--token',
                                       token, '--org', org])
 
-        print(result.output)  # Add this line for debugging
+        print(result.output)  # For debugging purposes
+        print(mock_post.return_value.json.return_value)  # For debugging the mock's json response
         self.assertEqual(result.exit_code, SUCCESS_EXIT_CODE)
         self.assertIn("[CT*] Project 'new_project' created successfully.", result.output)
         self.assertIn("[CT*] Scan started successfully", result.output)
@@ -87,7 +89,7 @@ class TestScanCommand(unittest.TestCase):
                                ['--target', source_code_path, '--project', 'test_project_123', '--url', url, '--token',
                                 token, '--org', org])
 
-        print(result.output)  # Add this line for debugging
+        print(result.output)  # For debugging purposes
         self.assertEqual(result.exit_code, FAILURE_EXIT_CODE)
         self.assertIn("[CT*] Scan initiation failed", result.output)
 
