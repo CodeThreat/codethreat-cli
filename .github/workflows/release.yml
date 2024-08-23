@@ -25,11 +25,18 @@ jobs:
         uses: commitizen-tools/commitizen-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          changelog_increment_filename: changelog-${{ steps.cz.outputs.version }}.md
+          changelog_increment_filename: body.md
 
       - name: List files in dist directory
         run: ls -lR .
-        
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: body.md
+          path: |
+            body.md
+
       - name: Set Outputs
         run: |
           echo "REVISION=${{ steps.cz.outputs.version }}" >> $GITHUB_ENV
@@ -82,17 +89,12 @@ jobs:
       - name: List files in dist directory
         run: ls -lR .
 
-      - name: Add changelog to artifacts
-        run: |
-          cp changelog-${{ needs.bump_version.outputs.revision }}.md dist/
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}
           path: |
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.*
-            dist/${{ needs.bump_version.outputs.changelog }}
 
   release-artifacts:
     needs: [bump_version, build]
@@ -112,7 +114,7 @@ jobs:
         with:
           tag_name: ${{ needs.bump_version.outputs.revision }}
           name: "Release ${{ needs.bump_version.outputs.revision }}"
-          body_path: dist/${{ needs.bump_version.outputs.changelog }}
+          body_path: dist/body.md
           draft: false
           prerelease: false
           files: |
@@ -122,7 +124,7 @@ jobs:
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
-            dist/${{ needs.bump_version.outputs.changelog }}
+            dist/body.md
 
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
