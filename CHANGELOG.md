@@ -1,3 +1,9 @@
+## 0.1.25 (2024-08-23)
+
+### Fix
+
+- add more ls to see what happens
+
 ## 0.1.24 (2024-08-23)
 
 ### Fix
