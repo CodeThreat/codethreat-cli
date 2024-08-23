@@ -27,6 +27,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           changelog_increment_filename: changelog-${{ steps.cz.outputs.version }}.md
 
+      - name: List files in dist directory
+        run: ls -lR .
+        
       - name: Set Outputs
         run: |
           echo "REVISION=${{ steps.cz.outputs.version }}" >> $GITHUB_ENV
