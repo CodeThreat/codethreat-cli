@@ -76,6 +76,9 @@ jobs:
           tar -czvf dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli
         shell: bash
 
+      - name: List files in dist directory
+        run: ls -lR .
+
       - name: Add changelog to artifacts
         run: |
           cp changelog-${{ needs.bump_version.outputs.revision }}.md dist/
