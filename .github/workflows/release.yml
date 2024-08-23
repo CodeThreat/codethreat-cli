@@ -27,9 +27,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           changelog_increment_filename: body.md
 
-      - name: List files in dist directory
-        run: ls -lR .
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -85,9 +82,6 @@ jobs:
         run: |
           tar -czvf dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}.tar.gz -C dist codethreat-cli
         shell: bash
-
-      - name: List files in dist directory
-        run: ls -lR .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
