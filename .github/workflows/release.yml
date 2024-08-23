@@ -107,8 +107,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.bump_version.outputs.revision }}
-          name: "Release ${{ needs.bump_version.outputs.revision }}"
-          body_path: body.md
+          name: "codethreat-cli ${{ needs.bump_version.outputs.revision }}"
+          body_path: dist/body.md/body.md
           draft: false
           prerelease: false
           files: |
@@ -118,7 +118,7 @@ jobs:
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
-            body.md
+            dist/body.md/body.md
 
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
