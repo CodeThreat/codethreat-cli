@@ -60,6 +60,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install -r requirements.txt
           pip install pyinstaller
 
       - name: Build executables
@@ -118,7 +119,5 @@ jobs:
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-macos-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-ubuntu-latest.tar.gz
             dist/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest/codethreat-cli-${{ needs.bump_version.outputs.revision }}-x86_64-windows-latest.zip
-            dist/body.md/body.md
-
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
