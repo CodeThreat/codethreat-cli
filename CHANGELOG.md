@@ -1,3 +1,10 @@
+## 0.1.30 (2024-08-23)
+
+### Fix
+
+- release req txt install step
+- remove body.md from publishing
+
 ## 0.1.29 (2024-08-23)
 
 ### Fix
