@@ -161,6 +161,7 @@ def scan(target, project, url, token, org, branch, policy_id):
             files = {'upfile': (f"{project}.zip", f, 'application/zip')}
             data = {
                 'project': project,
+                'scan_source': 'CLI'
             }
             if branch:
                 data['branch'] = branch
