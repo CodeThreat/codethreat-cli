@@ -39,7 +39,7 @@ Before performing any scans, you must authenticate with the CodeThreat platform.
 
 -   **Login**:
 
-    `codethreat-cli auth login --org <your-organization> --token <your-api-token>` 
+    `codethreat-cli auth login --org <your-organization> --token <your-api-token> --url <base-codethreat-url>` 
     
 -   **Remove authentication**:
 
