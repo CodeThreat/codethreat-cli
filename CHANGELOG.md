@@ -1,3 +1,9 @@
+## 0.4.1 (2025-08-06)
+
+### Fix
+
+- resolve PyInstaller build issues and enhance timeout handling
+
 ## 0.4.0 (2025-08-06)
 
 ### Feat
