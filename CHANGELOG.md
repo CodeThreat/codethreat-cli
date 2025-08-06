@@ -1,3 +1,38 @@
+## 0.2.1 (2025-01-27)
+
+### Feat
+
+- **scan**: Add comprehensive logging for detailed diagnostics
+- **scan**: Implement intelligent file exclusion for reduced upload sizes  
+- **scan**: Add automatic exclusion of build artifacts, dependencies, and temp files
+- **scan**: Enhanced error handling with specific error pattern detection
+- **scan**: Add network environment diagnostics (proxy detection, local IP)
+- **scan**: Implement retry mechanism with exponential backoff
+- **scan**: Add detailed ZIP creation logging with file/directory counting
+- **scan**: Include system information logging (OS, Python version)
+- **scan**: Add upload progress tracking with timestamps
+- **scan**: Enhanced timeout handling for large file uploads
+- **scan**: Add chunked file upload for large files (>100MB) to prevent memory issues
+- **scan**: Implement comprehensive file size categorization and limits
+- **scan**: Add hard limit of 2GB with automatic rejection for oversized files
+
+### Fix
+
+- **scan**: Resolve ConnectionError with OSError(22) 'Invalid argument' for large projects
+- **scan**: Fix memory issues during ZIP creation for large codebases  
+- **scan**: Implement chunked file reading to prevent Windows file handle limitations
+- **scan**: Add file accessibility test before upload attempts
+- **scan**: Improve upload stability for enterprise/proxy environments
+- **scan**: Add connection pooling management for large uploads
+- **scan**: Add Windows-specific error handling based on StackOverflow research
+
+### Improve
+
+- **scan**: Automatically exclude common large directories (node_modules, .git, Pods, DerivedData)
+- **scan**: Add file size warnings and recommendations
+- **scan**: Enhanced diagnostic output for troubleshooting upload failures
+- **troubleshooting**: Add comprehensive troubleshooting section to README
+
 ## 0.2.0 (2024-09-17)
 
 ### Feat

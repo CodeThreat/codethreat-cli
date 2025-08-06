@@ -3,7 +3,7 @@ from cli.auth import auth
 from cli.scan import scan
 
 # Define version information here
-VERSION = "0.1.0"
+VERSION = "0.2.1"
 
 
 # Custom help display with an enhanced ASCII art banner
