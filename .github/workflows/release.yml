@@ -28,7 +28,7 @@ jobs:
           changelog_increment_filename: body.md
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: body.md
           path: |
@@ -85,7 +85,7 @@ jobs:
         shell: bash
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: codethreat-cli-${{ needs.bump_version.outputs.revision }}-${{ matrix.architecture }}-${{ matrix.os }}
           path: |
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: dist
 
