@@ -140,7 +140,7 @@ def scan(target, project, url, token, org, branch, policy_id):
     print_message(f"[CT*] Checking project existence at: {project_check_url}", Fore.BLUE)
     
     try:
-        response = requests.get(project_check_url, headers=headers)
+    response = requests.get(project_check_url, headers=headers)
         print_message(f"[CT*] Project check response: {response.status_code}", Fore.BLUE)
     except Exception as e:
         print_message(f"[CT*] ERROR: Failed to check project existence: {e}", Fore.RED)
@@ -205,15 +205,71 @@ def scan(target, project, url, token, org, branch, policy_id):
     print_message(f"[CT*] - Total directories: {dir_count:,}", Fore.CYAN)
     print_message(f"[CT*] - Total size: {total_size / (1024*1024):.2f} MB", Fore.CYAN)
     
-    # Define excluded patterns for common files that shouldn't be scanned
+    # Define comprehensive excluded patterns for files that shouldn't be scanned
     exclude_patterns = [
-        '*.log', '*.tmp', '*.cache', '*.DS_Store',
-        'node_modules/', '.git/', '__pycache__/', 
-        '*.pyc', '*.pyo', '*.class', '*.jar',
-        'target/', 'build/', 'dist/', '.gradle/',
-        'Pods/', 'DerivedData/', '.build/',
-        '*.xcworkspace/', '*.xcodeproj/',
-        'coverage/', '.nyc_output/', '.coverage'
+        # System & Temp files
+        '*.log', '*.tmp', '*.cache', '*.DS_Store', '*.swp', '*.swo',
+        '*~', '*.bak', '*.orig', 'Thumbs.db', 'ehthumbs.db',
+        
+        # Version Control
+        '.git/', '.svn/', '.hg/', '.bzr/', 'CVS/',
+        
+        # Node.js & JavaScript
+        'node_modules/', 'npm-debug.log*', 'yarn-debug.log*', 'yarn-error.log*',
+        '.npm/', '.yarn/', 'dist/', 'coverage/', '.nyc_output/', '.coverage',
+        
+        # Python
+        '__pycache__/', '*.pyc', '*.pyo', '*.pyd', '.Python', 'pip-log.txt',
+        'pip-delete-this-directory.txt', '.tox/', '.coverage', '.pytest_cache/',
+        '.venv/', 'venv/', 'env/', 'ENV/', 'env.bak/', 'venv.bak/',
+        
+        # Java & Android
+        '*.class', '*.jar', '*.war', '*.ear', 'target/', '.gradle/', 'build/',
+        'gradle/', 'gradlew', 'gradlew.bat', '.idea/', '*.iml', '*.iws', '*.ipr',
+        
+        # iOS & Swift
+        'Pods/', 'DerivedData/', 'build/', '.build/', 'xcuserdata/',
+        '*.xcworkspace/', '*.xcodeproj/', '*.dSYM/', '*.framework/',
+        '*.xcarchive/', 'fastlane/report.xml', 'fastlane/Preview.html',
+        'fastlane/screenshots/', 'fastlane/test_output/',
+        
+        # React Native specific
+        'ios/build/', 'android/build/', 'android/.gradle/', 'android/app/build/',
+        'metro.config.js', 'react-native.config.js',
+        
+        # .NET & C#
+        'bin/', 'obj/', '*.dll', '*.exe', '*.pdb', 'packages/',
+        '*.user', '*.suo', '*.cache', '*.docstates',
+        
+        # Ruby
+        'vendor/', '.bundle/', 'Gemfile.lock',
+        
+        # Go
+        'vendor/', 'go.sum',
+        
+        # Rust
+        'target/', 'Cargo.lock',
+        
+        # Database
+        '*.sqlite', '*.db', '*.sqlite3',
+        
+        # Archives & Binaries
+        '*.zip', '*.tar', '*.gz', '*.rar', '*.7z', '*.dmg', '*.iso',
+        '*.so', '*.dylib', '*.a', '*.lib',
+        
+        # IDE & Editor files
+        '.vscode/', '.settings/', '.project', '.classpath',
+        '*.sublime-project', '*.sublime-workspace',
+        
+        # Documentation & Images (large files)
+        '*.pdf', '*.doc', '*.docx', '*.ppt', '*.pptx',
+        '*.png', '*.jpg', '*.jpeg', '*.gif', '*.svg', '*.ico',
+        '*.mp4', '*.avi', '*.mov', '*.mkv', '*.wmv',
+        '*.mp3', '*.wav', '*.flac', '*.aac',
+        
+        # Logs & Debug
+        'logs/', '*.log.*', 'debug.log', 'error.log', 'access.log',
+        'npm-debug.log', 'yarn-debug.log', 'yarn-error.log'
     ]
     
     print_message(f"[CT*] Exclusion patterns applied: {len(exclude_patterns)} patterns", Fore.CYAN)
@@ -361,14 +417,31 @@ def scan(target, project, url, token, org, branch, policy_id):
         print_message(f"[CT*] • Large: {LARGE_SIZE_MB}-{WARNING_SIZE_MB} MB (slower)", Fore.BLUE)
         print_message(f"[CT*] • Warning: {WARNING_SIZE_MB}-{MAXIMUM_SIZE_MB} MB (risky)", Fore.BLUE)
         print_message(f"[CT*] • Maximum: {MAXIMUM_SIZE_MB} MB (hard limit)", Fore.BLUE)
-        
+
         # Upload the zipped directory and start the scan
         upload_url = f"{base_url}/api/scan/start"
         print_message(f"[CT*] Upload URL: {upload_url}", Fore.BLUE)
         
-        # Set timeout and chunk size for large file uploads
-        timeout = (30, 300)  # (connection_timeout, read_timeout)
-        print_message(f"[CT*] Upload timeout settings: connection={timeout[0]}s, read={timeout[1]}s", Fore.BLUE)
+        # Dynamic timeout based on ZIP file size
+        zip_size_mb = zip_size / (1024 * 1024)
+        
+        # Calculate VERY generous timeouts based on file size
+        # Designed for slow connections (1 MB/s minimum)
+        if zip_size_mb <= OPTIMAL_SIZE_MB:  # <= 50MB
+            connection_timeout = 60    # 1 minute
+            read_timeout = 900         # 15 minutes
+        elif zip_size_mb <= LARGE_SIZE_MB:  # <= 100MB
+            connection_timeout = 120   # 2 minutes
+            read_timeout = 1800        # 30 minutes
+        elif zip_size_mb <= WARNING_SIZE_MB:  # <= 500MB
+            connection_timeout = 300   # 5 minutes  
+            read_timeout = 5400        # 90 minutes (1.5 hours)
+        else:  # Very large files
+            connection_timeout = 600   # 10 minutes
+            read_timeout = 10800       # 3 hours
+        
+        timeout = (connection_timeout, read_timeout)
+        print_message(f"[CT*] Dynamic timeout for {zip_size_mb:.2f}MB: Connection={connection_timeout}s, Read={read_timeout}s", Fore.BLUE)
         
         # Log network environment details
         import socket
@@ -424,33 +497,70 @@ def scan(target, project, url, token, org, branch, policy_id):
             if zip_size_mb > LARGE_SIZE_MB:  # 100MB+ files
                 print_message(f"[CT*] Large file detected ({zip_size_mb:.2f} MB), using streaming upload", Fore.YELLOW)
                 
-                # Use custom file-like object to avoid loading entire file into memory
-                class ChunkedFileReader:
-                    def __init__(self, file_path, chunk_size=8192):
+                # Use custom file-like object with progress tracking
+                class ProgressTrackingFileReader:
+                    def __init__(self, file_path, chunk_size=65536):  # 64KB chunks for better progress
                         self.file_path = file_path
                         self.chunk_size = chunk_size
                         self._file = None
+                        self.file_size = os.path.getsize(file_path)
+                        self.bytes_read = 0
+                        self.last_progress_time = 0
+                        self.start_time = None
                         
                     def __enter__(self):
                         self._file = open(self.file_path, 'rb')
+                        self.start_time = time.time()
+                        print_message(f"[CT*] 📤 Starting upload of {self.file_size / (1024*1024):.2f} MB file...", Fore.CYAN)
                         return self
                         
                     def __exit__(self, exc_type, exc_val, exc_tb):
                         if self._file:
                             self._file.close()
+                        if self.start_time:
+                            total_time = time.time() - self.start_time
+                            speed_mbps = (self.bytes_read / (1024*1024)) / max(total_time, 1)
+                            print_message(f"[CT*] ✅ Upload completed in {total_time:.1f}s at {speed_mbps:.2f} MB/s", Fore.GREEN)
                     
                     def read(self, size=-1):
                         if size == -1:
-                            return self._file.read()
-                        return self._file.read(size)
+                            data = self._file.read()
+                        else:
+                            data = self._file.read(size)
+                        
+                        # Update progress tracking
+                        self.bytes_read += len(data)
+                        current_time = time.time()
+                        
+                        # Show progress every 5 seconds or every 10% of file
+                        if (current_time - self.last_progress_time >= 5.0) or (self.bytes_read % (self.file_size // 10) < len(data)):
+                            progress_percent = (self.bytes_read / self.file_size) * 100
+                            elapsed_time = current_time - self.start_time if self.start_time else 0
+                            
+                            if elapsed_time > 0:
+                                speed_mbps = (self.bytes_read / (1024*1024)) / elapsed_time
+                                remaining_bytes = self.file_size - self.bytes_read
+                                eta_seconds = remaining_bytes / (self.bytes_read / elapsed_time) if self.bytes_read > 0 else 0
+                                
+                                print_message(f"[CT*] 📊 Upload Progress: {progress_percent:.1f}% "
+                                             f"({self.bytes_read / (1024*1024):.1f}/{self.file_size / (1024*1024):.1f} MB) "
+                                             f"Speed: {speed_mbps:.2f} MB/s "
+                                             f"ETA: {eta_seconds:.0f}s", Fore.BLUE)
+                            
+                            self.last_progress_time = current_time
+                        
+                        return data
                     
                     def seek(self, offset, whence=0):
-                        return self._file.seek(offset, whence)
+                        result = self._file.seek(offset, whence)
+                        # Update bytes_read based on current position
+                        self.bytes_read = self._file.tell()
+                        return result
                     
                     def tell(self):
                         return self._file.tell()
                 
-                with ChunkedFileReader(zip_path) as chunked_file:
+                with ProgressTrackingFileReader(zip_path) as chunked_file:
                     files = {'upfile': (f"{project}.zip", chunked_file, 'application/zip')}
                     data = {
                         'project': project,
@@ -485,8 +595,11 @@ def scan(target, project, url, token, org, branch, policy_id):
                     )
             else:
                 # Standard upload for smaller files
+                print_message(f"[CT*] Small file detected ({zip_size_mb:.2f} MB), using standard upload", Fore.CYAN)
+                
                 with open(zip_path, 'rb') as f:
-                    print_message(f"[CT*] ZIP file opened successfully", Fore.CYAN)
+                    print_message(f"[CT*] 📤 Starting upload of {zip_size_mb:.2f} MB file...", Fore.CYAN)
+                    upload_start_time = time.time()
                     
                     files = {'upfile': (f"{project}.zip", f, 'application/zip')}
                     data = {
@@ -502,12 +615,12 @@ def scan(target, project, url, token, org, branch, policy_id):
 
                     print_message(f"[CT*] Upload parameters: {data}", Fore.BLUE)
                     
-                    # Disable connection pooling for large uploads to avoid issues
+                    # Configure headers
                     upload_headers = headers.copy()
                     upload_headers['Connection'] = 'close'
                     print_message(f"[CT*] Upload headers configured", Fore.BLUE)
                     
-                    print_message(f"[CT*] Starting file upload... This may take several minutes for large projects.", Fore.CYAN)
+                    print_message(f"[CT*] Starting file upload...", Fore.CYAN)
                     print_message(f"[CT*] Upload started at: {get_timestamp()}", Fore.CYAN)
                     
                     # Attempt upload
@@ -520,9 +633,14 @@ def scan(target, project, url, token, org, branch, policy_id):
                         stream=False  # Don't stream response for file uploads
                     )
                 
-                print_message(f"[CT*] Upload completed at: {get_timestamp()}", Fore.CYAN)
-                print_message(f"[CT*] Response status code: {response.status_code}", Fore.CYAN)
-                print_message(f"[CT*] Response headers: {dict(response.headers)}", Fore.BLUE)
+                    upload_end_time = time.time()
+                    upload_duration = upload_end_time - upload_start_time
+                    upload_speed = (zip_size_mb) / max(upload_duration, 1)
+                    
+                    print_message(f"[CT*] ✅ Upload completed in {upload_duration:.1f}s at {upload_speed:.2f} MB/s", Fore.GREEN)
+                    print_message(f"[CT*] Upload finished at: {get_timestamp()}", Fore.CYAN)
+                    print_message(f"[CT*] Response status code: {response.status_code}", Fore.CYAN)
+                    print_message(f"[CT*] Response headers: {dict(response.headers)}", Fore.BLUE)
                 
         except requests.exceptions.ConnectionError as e:
             print_message(f"[CT*] ===== CONNECTION ERROR DETAILS =====", Fore.RED)
