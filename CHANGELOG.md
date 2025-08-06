@@ -1,3 +1,9 @@
+## 0.4.0 (2025-08-06)
+
+### Feat
+
+- add enhanced timeout handling and upload progress tracking
+
 ## 0.3.0 (2025-08-06)
 
 ## 0.2.1 (2025-01-27)
