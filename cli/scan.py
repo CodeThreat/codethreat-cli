@@ -140,7 +140,7 @@ def scan(target, project, url, token, org, branch, policy_id):
     print_message(f"[CT*] Checking project existence at: {project_check_url}", Fore.BLUE)
     
     try:
-    response = requests.get(project_check_url, headers=headers)
+        response = requests.get(project_check_url, headers=headers)
         print_message(f"[CT*] Project check response: {response.status_code}", Fore.BLUE)
     except Exception as e:
         print_message(f"[CT*] ERROR: Failed to check project existence: {e}", Fore.RED)

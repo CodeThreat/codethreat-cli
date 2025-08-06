@@ -66,9 +66,37 @@ jobs:
       - name: Build executables
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            pyinstaller --onefile cli/main.py --name "codethreat-cli.exe" --icon=ct.ico
+            pyinstaller --onefile cli/main.py --name "codethreat-cli.exe" --icon=ct.ico \
+              --add-data "cli;cli" \
+              --hidden-import cli.scan \
+              --hidden-import cli.auth \
+              --hidden-import cli.utils \
+              --hidden-import requests \
+              --hidden-import click \
+              --hidden-import colorama \
+              --hidden-import zipfile \
+              --hidden-import tempfile \
+              --hidden-import datetime \
+              --hidden-import platform \
+              --hidden-import socket \
+              --hidden-import fnmatch \
+              --collect-submodules cli
           else
-            pyinstaller --onefile cli/main.py --name "codethreat-cli" --icon=ct.ico
+            pyinstaller --onefile cli/main.py --name "codethreat-cli" --icon=ct.ico \
+              --add-data "cli:cli" \
+              --hidden-import cli.scan \
+              --hidden-import cli.auth \
+              --hidden-import cli.utils \
+              --hidden-import requests \
+              --hidden-import click \
+              --hidden-import colorama \
+              --hidden-import zipfile \
+              --hidden-import tempfile \
+              --hidden-import datetime \
+              --hidden-import platform \
+              --hidden-import socket \
+              --hidden-import fnmatch \
+              --collect-submodules cli
           fi
         shell: bash
 
